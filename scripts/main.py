@@ -3,9 +3,10 @@
 from datetime import datetime
 import pandas as pd 
 
-from mp4_to_mp3 import convert_mp4_to_mp3
+from mp4_to_mp3 import convert_directory
 from parse_google_doc import get_google_sheet
 from get_dropbox_files import get_dropbox_files
+from file_utils import get_local_files
 from upload import upload_to_mixcloud
 
 def add_filepath_column(filtered_df, files):
@@ -31,10 +32,10 @@ def add_filepath_column(filtered_df, files):
 
     return filtered_df
 
-def main(todays_date):
+def main(todays_date, use_local_files=False):
 
-    convert_mp4_to_mp3(mp4_path="test/input", 
-                       mp3_path="test/output")
+    convert_directory(input_dir="test/input", 
+                       output_dir="test/output")
 
     metadata = get_google_sheet()
 
@@ -47,9 +48,12 @@ def main(todays_date):
 
     filtered_df = metadata[metadata['Start time of your show'].dt.strftime('%Y-%m-%d') == formatted_date]
 
-    files = get_dropbox_files(mp4_path="test/input",
-                              acess_token_path="dropbox_access_token", 
-                              )
+    if use_local_files:
+        files = get_local_files("test/input")
+    else:
+        files = get_dropbox_files(mp4_path="test/input",
+                                acess_token_path="dropbox_access_token", 
+                                )
     
     filtered_df = add_filepath_column(filtered_df, files)
 
